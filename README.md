@@ -2565,3 +2565,8 @@ If you're seeing this error, you're likely using an old version of `react-script
 ## Something Missing?
 
 If you have ideas for more “How To” recipes that should be on this page, [let us know](https://github.com/facebook/create-react-app/issues) or [contribute some!](https://github.com/facebook/create-react-app/edit/master/packages/react-scripts/template/README.md)
+
+# Credits
+- https://upload.wikimedia.org/wikipedia/commons/d/d3/Emoji_u1f525.svg | For the image
+- https://github.com/mozmorris/react-webcam | Webcam component to capture images to send to the server
+- https://www.npmjs.com/package/react-device-detect | Determine if the user is on a mobile device or not
