@@ -7,12 +7,15 @@ import logo from './logo.svg';
 import './App.css';
 
 import IncidentSubscription from './components/IncidentSubscription';
+import Incidents from './components/Incidents';
 import Login from './components/Login';
 import Register from './components/Register';
 import AuthedRoute from './components/AuthedRoute';
 
 import STFClient from './shared/client';
 import CookieManager from './shared/cookieManager';
+import Link from 'react-router-dom/Link';
+import VideoStream from './components/VideoStreamDevelopment';
 
 class App extends Component {
   constructor(props) {
@@ -29,7 +32,22 @@ class App extends Component {
       <Router>
         <div className="App">
           <header className="App-header">
-            <img src={logo} className="App-logo" alt="Logo" />
+            <Link to={"/"}>
+              <img src={logo} className="App-logo" alt="Logo" />
+            </Link>
+            <div className="Links">
+              <ul>
+                <li>
+                  <Link to="/subscribe">Subscribe to Incidents in your area.</Link>
+                </li>
+                <li>
+                  <Link to="/incidents">All Incidents reported thus far.</Link>
+                </li>
+                <li>
+                  <Link to="/videostream">Video Stream of Development of App</Link>
+                </li>
+              </ul>
+            </div>
           </header>
           <div>
             <Route exact path="/" component={() => <CaptureIncident client={this.client} />} />
@@ -37,7 +55,7 @@ class App extends Component {
               exact
               path="/subscribe"
               isAuthenticated={isAuthenticated}
-              isClient={this.client}
+              client={this.client}
               cookieManager={this.cookieManager}
               component={IncidentSubscription}
             />
@@ -59,10 +77,28 @@ class App extends Component {
                component={() =>
                 <Register
                   client={this.client}
+                  isAuthenticated={isAuthenticated}
                   cookieManager={this.cookieManager}
                 />
               }
             />
+            <Route
+              exact
+              path="/incidents"
+              component={() =>
+                <Incidents
+                  client={this.client}
+                />
+              }
+            />
+            <Route
+              exact
+              path="/videostream"
+              component={VideoStream}
+            />
+          </div>
+          <div class="footer">
+            Team Engine #9
           </div>
         </div>
       </Router>

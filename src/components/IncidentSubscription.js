@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import styled from 'styled-components';
 import validator from 'validator';
 
 const initialState = {
@@ -9,6 +10,30 @@ const initialState = {
   authorizationCookie: ''
 };
 
+const HeaderSubscription = styled.div`
+  display: block;
+  font-size: 1.5em;
+  color: black;
+  padding: 1em 0em;
+`;
+
+const Label = styled.label`
+  display: block;
+  padding: 1em 2em;
+  text-align: left;
+`;
+
+const InputField = styled.input`
+  margin-left: 1em;
+`;
+
+const Submit = styled.input`
+  padding: 1em 2em;
+  font-size: 1em;
+  color: white;
+  background-color: red;
+`;
+
 class IncidentSubscription extends Component {
   constructor(props) {
     super(props);
@@ -18,7 +43,6 @@ class IncidentSubscription extends Component {
     this.submitSubscription = this.submitSubscription.bind(this);
     this.onBlurCapture = this.onBlurCapture.bind(this);
     this.validatePayload = this.validatePayload.bind(this);
-    this.uploadProgressIndicator = this.uploadProgressIndicator.bind(this);
   }
 
   async submitSubscription(event) {
@@ -34,12 +58,16 @@ class IncidentSubscription extends Component {
         const response = await this.props.client.submitSubscription({
           email,
           postalCode
-        });
+        }, this.props.cookieManager.getCookie());
 
         if (response.status !== 200) {
           throw new Error('Unable to submit your email/postal code. Please try again.');
         }
-        this.setState(initialState);
+
+        this.setState({
+          ...initialState,
+          uploadStatus: 'Successfully submitted!'
+        });
         return;
       } catch (error) {
         this.setState({
@@ -70,75 +98,56 @@ class IncidentSubscription extends Component {
     });
   }
 
-  uploadProgressIndicator(progressEvent) {
-    const uploadStatus = this.calculateUploadStatus({
-      total: progressEvent.total,
-      loaded: progressEvent.loaded
-    });
-
-    this.setState({
-      uploadStatus
-    });
-  }
-
-  calculateUploadStatus({ total, loaded }) {
-    if (total === loaded) {
-      return 'Upload complete';
-    }
-
-    const loadPercentage = Math.floor((loaded / total) * 100);
-    return `Upload is ${loadPercentage}% complete`;
-  }
-
-  isAuthorized(props) {
-    const { cookies } = props;
-
-    if (cookies.get('STFCookie')) {
-      return true;
-    }
-    return false;
-  }
-
   render() {
     return (
       <div>
+        <HeaderSubscription>
+          Enter your email here and we can alert you of any near by
+          wildfire incidents.
+        </HeaderSubscription>
         <div>
-          {this.state.error &&
+          {this.state.uploadStatus ? 
+            <div>{this.state.uploadStatus}</div> :
             <div>
-              {this.state.error}
+              <div>
+                {this.state.error &&
+                  <div>
+                    {this.state.error}
+                  </div>
+                }
+              </div>
+              <div>
+                {this.uploadStatus &&
+                  <div>{this.uploadStatus}</div>
+                }
+              </div>
+              <form onSubmit={this.submitSubscription}>
+                <Label>
+                  Email to subscribe to incidents:
+                  <InputField
+                    type="email"
+                    name="emailInput"
+                    defaultValue={this.state.emailInputVal}
+                    onBlur={this.onBlurCapture}
+                  />
+                </Label>
+                <br />
+                <Label>
+                  Enter Zipcode of area you wish to be informed for any future fire incident:
+                  <InputField
+                    type="number"
+                    id="postalCode"
+                    name="postalCodeInput"
+                    placeholder="15203 for example"
+                    defaultValue={this.state.postalCodeInputVal}
+                    onBlur={this.onBlurCapture}
+                  />
+                </Label>
+                <Submit type="submit" value="Submit" />
+              </form>
             </div>
           }
         </div>
-        <div>
-          {this.uploadStatus &&
-            <div>{this.uploadStatus}</div>
-          }
-        </div>
-        <form onSubmit={this.submitSubscription}>
-          <label>
-            Email to subscribe to incidents:
-            <input
-              type="email"
-              name="emailInput"
-              defaultValue={this.state.emailInputVal}
-              onBlur={this.onBlurCapture}
-            >
-            </input>
-          </label>
-          <br />
-          <label>
-            Enter Zipcode of area you wish to be informed for any future fire incident:
-            <input
-              type="text"
-              id="postalCode"
-              name="postalCodeInput"
-              placeholder="15203 for example"
-              defaultValue={this.state.postalCodeInputVal}
-              onBlur={this.onBlurCapture}
-            />
-          </label>
-          <input type="submit" value="Submit" />
-        </form>
       </div>
     );
   }

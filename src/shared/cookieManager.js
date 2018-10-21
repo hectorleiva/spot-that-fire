@@ -11,6 +11,10 @@ export default class CookieManager {
         });
     }
 
+    getCookie() {
+        return this.cookies.get(this.baseCookieName);
+    }
+
     checkCookie() {
         return !!this.cookies.get(this.baseCookieName);
     }

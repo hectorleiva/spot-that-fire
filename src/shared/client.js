@@ -5,10 +5,12 @@ export default class STFClient {
         this.incidentUrl = '/api/incidents';
         this.userUrl = '/api/Users';
         this.loginUrl = '/api/Users/login';
-        this.subscriptionUrl = '/api/subscription';
+        this.subscriptionUrl = '/api/subscriptions';
+
+        console.log('process.env: ', process.env);
 
         this.axios = axios.create({
-            baseURL: 'http://localhost:3001',
+            baseURL: process.env.REACT_APP_DATASTORE || 'http://localhost:3001',
             timeout: 10000,
             onUploadProgress: (props && props.uploadProgressIndicator) || null
         });
@@ -18,7 +20,9 @@ export default class STFClient {
         return this.axios.post(this.incidentUrl, payload);
     }
 
-    async submitSubscription(payload) {
+    async submitSubscription(payload, authToken) {
+        this.axios.defaults.headers.common['Authorization'] = authToken;
+        console.log(this.axios.defaults);
         return this.axios.post(this.subscriptionUrl, payload);
     }
 
@@ -28,5 +32,9 @@ export default class STFClient {
 
     async register(payload) {
         return this.axios.post(this.userUrl, payload);
+    }
+
+    async retrieveAllIncidents() {
+        return this.axios.get(this.incidentUrl);
     }
 };

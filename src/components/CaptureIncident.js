@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Webcam from "react-webcam";
+import styled from 'styled-components';
 import { isMobile } from 'react-device-detect';
 import Geolocation from 'react-geolocation';
 
@@ -19,6 +20,26 @@ const initialState = {
   note: ''
 };
 
+const SubmitButton = styled.button`
+  width: 100%;
+  font-size: 1em;
+  padding: 1em 2em;
+  color: white;
+  background-color: ${props => (props.uploadComplete) ? 'green' : 'red'};
+`;
+
+const Note = styled.textarea`
+  font-size: 1em;
+  display: block;
+  width: 80%;
+  height: 200px;
+  margin: 0 5%;
+  padding: 0px 20px;
+  margin-bottom: 5%;
+  border: 1px solid black;
+  background-color: white;
+`;
+
 export default class CaptureIncident extends Component {
   constructor(props) {
     super(props);
@@ -35,7 +56,8 @@ export default class CaptureIncident extends Component {
     const imageSrc = this.webcam.getScreenshot();
 
     this.setState({
-      imageSrc
+      imageSrc,
+      uploadStatus: 'Uploading Incident'
     });
 
     this.uploadMedia(imageSrc);
@@ -108,14 +130,19 @@ export default class CaptureIncident extends Component {
     };
 
     try {
-      const response = await this.props.client.submitIncident(payload);
-      console.log('response: ', response);
+      await this.props.client.submitIncident(payload);
 
       // Reset state
       this.setState({
         ...initialState,
         uploadStatus: 'Upload complete'
       });
+
+      setTimeout(() => {
+        this.setState({
+          uploadStatus: "Press here to take an image of a fire and upload it."
+        });
+      }, 2000);
     } catch (error) {
       this.setState({
         uploadStatus: 'Unable to upload, please try again'
@@ -161,9 +188,6 @@ export default class CaptureIncident extends Component {
   render() {
     return(
       <div>
-        <button onClick={this.onCapture}>
-          Click here to take an image of a fire and upload it.
-        </button>
         <Geolocation
           onSuccess={this.onCapturingUserLocation}
           render={({
@@ -178,12 +202,6 @@ export default class CaptureIncident extends Component {
             </div>
           }
         />
-        <div>
-          {this.state.uploadStatus ?
-            'UploadStatus: ' + this.state.uploadStatus :
-            null
-          }
-        </div>
         <div>
           {this.state.imageSrc ? 
             <img src={this.state.imageSrc} alt="Current Capture" /> :
@@ -208,12 +226,24 @@ export default class CaptureIncident extends Component {
               videoConstraints={this.videoConstraints}
             />
           </div>
-          <textarea
+          <label>Write a note with any additional information (Optional)</label>
+          <Note
             id="note"
             onBlur={this.onBlurWritingNote}
             defaultValue={this.state.note}
-          ></textarea>
+          ></Note>
         </div>
+        <SubmitButton
+          disabled={this.state.uploadStatus === 'Upload complete'}
+          uploadComplete={this.state.uploadStatus === 'Upload complete'}
+          onClick={this.onCapture}
+        >
+          {
+            this.state.uploadStatus ?
+            this.state.uploadStatus :
+            "Press here to take an image of a fire and upload it."
+          }
+        </SubmitButton>
       </div>
     );
   }
